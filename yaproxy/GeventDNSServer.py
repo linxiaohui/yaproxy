@@ -21,7 +21,7 @@ class DNSServerImpl(DatagramServer):
         self.special_hosts = []
         self.authority_dns = "114.114.114.114"
 
-    def set_hosts(self, hosts: list[(str, str)], authority_dns="114.114.114.114"):
+    def set_hosts(self, hosts, authority_dns="114.114.114.114"):
         self.special_hosts = hosts
         self.authority_dns = authority_dns
 
@@ -63,3 +63,6 @@ class DNSServer(object):
         _server.set_hosts(self.hosts, self.DNS_SERVER)
         _server.serve_forever()
 
+if __name__ == "__main__":
+    s = DNSServer("0.0.0.0", 53)
+    s.start()

@@ -11,12 +11,16 @@ from DNSParser import DNSParser
 
 class DNSHandlerV2(socketserver.BaseRequestHandler):
     def __init__(self, speical_hosts, real_dns_server, request, client_address, server):
-        super().__init__(request, client_address, server)
+        print("speical_hosts", speical_hosts)
+        
         self.socket = None
         self.specaial_hosts = speical_hosts
         self.real_dns_server = real_dns_server
+        print("Init OK")
+        super(DNSHandlerV2, self).__init__(request, client_address, server)
 
     def handle(self):
+        print("Handle req")
         data = self.request[0]
         self.socket = self.request[1]
         query = DNSParser.parse_query(data)
