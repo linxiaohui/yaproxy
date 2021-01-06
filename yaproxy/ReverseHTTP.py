@@ -1,20 +1,27 @@
 # -*- coding: utf-8 -*-
-
-# Copyright (c) Twisted Matrix Laboratories.
-# See LICENSE for details.
-
 """
-This example demonstrates how to run a reverse proxy.
-
-Run this example with:
-    $ python reverse-proxy.py
-
-Then visit http://localhost:8080/ in your web browser.
+基于twisted的反向代理服务器；仅支持HTTP协议
 """
 
 from twisted.internet import reactor
 from twisted.web import proxy, server
 
-site = server.Site(proxy.ReverseProxyResource(b'www.yahoo.com', 80, b''))
-reactor.listenTCP(8080, site)
-reactor.run()
+
+class HttpReverseServer(object):
+    def __init__(self, port=8080):
+        self.port = port
+        self.remote_server = None
+        self.remote_port = 80
+
+    def set_remote_server(self, r_server: str):
+        self.remote_server = r_server
+
+    def start(self):
+        site = server.Site(proxy.ReverseProxyResource(self.remote_server, self.remote_port, b''))
+        reactor.listenTCP(self.port, site)
+        reactor.run()
+
+if __name__ == "__main__":
+    s = HttpReverseServer()
+    s.set_remote_server('www.gov.cn')
+    s.start()
