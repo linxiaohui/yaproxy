@@ -17,9 +17,9 @@ def udp_send(address, data):
 
 class DNSServerImpl(DatagramServer):
     def __init__(self, svr_name):
-        super(DNSServerImpl, self).__init__(svr_name)
         self.special_hosts = []
-        self.authority_dns = "114.114.114.114"
+        self.authority_dns = "114.114.114.114:53"
+        super(DNSServerImpl, self).__init__(svr_name)
 
     def set_hosts(self, hosts, authority_dns="114.114.114.114"):
         self.special_hosts = hosts
@@ -45,24 +45,25 @@ class DNSServerImpl(DatagramServer):
 
 
 class DNSServer(object):
-    def __init__(self, ip, port):
+    def __init__(self, ip="0.0.0.0", port=53):
         self.DNS_SERVER = ("114.114.114.114", 53)
         self.listen_ip = ip
         self.listen_port = port
-        self.hosts = {}
-    
+        self.special_hosts = {}
+
+    def set_hosts(self, hosts):
+        self.special_hosts.update(hosts)
+
     def add_host(self, domain_name, resolve_ip):
         self.hosts[domain_name] = resolve_ip
-
-    def load_hosts(self):
-        pass
 
     def start(self):
         _server_name = f"{self.listen_ip}:{self.listen_port}"
         _server = DNSServerImpl(_server_name)
-        _server.set_hosts(self.hosts, self.DNS_SERVER)
+        _server.set_hosts(self.special_hosts, self.DNS_SERVER)
         _server.serve_forever()
 
 if __name__ == "__main__":
     s = DNSServer("0.0.0.0", 53)
+    s.set_hosts({b'abc': b'127.0.0.1'})
     s.start()

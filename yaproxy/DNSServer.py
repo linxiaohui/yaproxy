@@ -38,14 +38,25 @@ class DNSHandler(socketserver.BaseRequestHandler):
             self.socket.sendto(response, address)
 
 
+class DNSServer(object):
+    def __init__(self, listen_ip="0.0.0.0", port=53):
+        self.special_hosts = {}
+        self.listen_ip = listen_ip
+        self.port = port
+
+    def set_hosts(self, hosts):
+        self.special_hosts.update(hosts)
+
+    def start(self):
+        try:
+            dns_server = socketserver.ForkingUDPServer((self.listen_ip, self.port), DNSHandler)
+        except Exception as ex:
+            print(ex)
+            dns_server = socketserver.ThreadingUDPServer((self.listen_ip, self.port), DNSHandler)
+        dns_server.special_host = self.special_hosts
+        dns_server.serve_forever()
+
 if __name__ == "__main__":
-    HOST = "0.0.0.0"
-    PORT = 53
-    dns_server = None
-    try:
-        dns_server = socketserver.ForkingUDPServer((HOST, PORT), DNSHandler)
-    except Exception as ex:
-        print(ex)
-        dns_server = socketserver.ThreadingUDPServer((HOST, PORT), DNSHandler)
-    dns_server.special_host = []
-    dns_server.serve_forever()
+    svr = DNSServer()
+    svr.set_hosts({b'abc': b'127.0.0.1'})
+    svr.start()

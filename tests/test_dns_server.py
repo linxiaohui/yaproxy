@@ -3,11 +3,11 @@
 DNSServer 的使用代码
 """
 
-import yaproxy
 
-server = yaproxy.create_dns_proxy()
+from yaproxy.DNSServer import DNSServer
+from yaproxy.DNSServerV2 import DNSServer
+from yaproxy.GeventDNSServer import DNSServer
 
-server.set_config()
-
-server.listen()
-
+svr = DNSServer()
+svr.set_hosts({b'abc': b'127.0.0.1'})
+svr.start()
