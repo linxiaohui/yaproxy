@@ -1,14 +1,27 @@
 # -*- coding: utf-8 -*-
+"""
+基于twisted实现的HTTP代理服务
+"""
+import sys
 
 from twisted.web import proxy, http
 from twisted.internet import reactor
 from twisted.python import log
-import sys
-log.startLogging(sys.stdout)
- 
+
+
 class ProxyFactory(http.HTTPFactory):
     protocol = proxy.Proxy
- 
-reactor.listenTCP(18080, ProxyFactory())
-reactor.run()
 
+class HTTPProxy(object):
+    def __init__(self, listen_port=18080):
+        self.port = listen_port
+
+    def start(self):
+        log.startLogging(sys.stdout)
+        reactor.listenTCP(self.port, ProxyFactory())
+        reactor.run()
+
+
+if __name__ == "__main__":
+    p = HTTPProxy()
+    p.start()

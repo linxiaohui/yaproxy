@@ -1,5 +1,35 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+在 https://github.com/rfyiamcool/toproxy 的基础上修改；
+fix：
+   1. tornado版本导致的问题
+   2. python3版本问题
 
+保留原文件的版权声明
+
+The MIT License (MIT)
+
+Copyright (c) 2015 rui fengyun
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 import logging
 import os
 import re
@@ -19,7 +49,7 @@ logger = logging.getLogger()
 class ProxyHandler(tornado.web.RequestHandler):
     SUPPORTED_METHODS = ['GET', 'POST', 'CONNECT']
 
-    @tornado.web.asynchronous
+    @tornado.gen.coroutine
     def get(self):
         logger.debug('Handle %s request to %s', self.request.method, self.request.uri)
 
@@ -83,11 +113,11 @@ class ProxyHandler(tornado.web.RequestHandler):
                 self.write('Internal server error:\n' + str(e))
                 self.finish()
 
-    @tornado.web.asynchronous
+    @tornado.gen.coroutine
     def post(self):
         return self.get()
 
-    @tornado.web.asynchronous
+    @tornado.gen.coroutine
     def connect(self):
         logger.debug('Start CONNECT to %s', self.request.uri)
         host, port = self.request.uri.split(':')
@@ -193,10 +223,13 @@ def fetch_request(url, callback, **kwargs):
         host, port = parse_proxy(proxy)
         kwargs['proxy_host'] = host
         kwargs['proxy_port'] = port
-
+        kwargs['proxy_port'] = port
+        kwargs['proxy_port'] = port
+    kwargs['follow_redirects'] = True
+    kwargs['max_redirects'] = 3
     req = tornado.httpclient.HTTPRequest(url, **kwargs)
     client = tornado.httpclient.AsyncHTTPClient()
-    client.fetch(req, callback, follow_redirects=True, max_redirects=3)
+    client.fetch(req, callback)
 
 
 def run_proxy(port, pnum=1, start_ioloop=True):
@@ -246,4 +279,3 @@ if __name__ == '__main__':
 
     pnum = int(args.fork)
     run_proxy(port, pnum)
-

@@ -8,8 +8,8 @@ from twisted.web import proxy, server
 
 
 class HttpReverseServer(object):
-    def __init__(self, port=8080):
-        self.port = port
+    def __init__(self, listen_port=8080):
+        self.port = listen_port
         self.remote_server = None
         self.remote_port = 80
 

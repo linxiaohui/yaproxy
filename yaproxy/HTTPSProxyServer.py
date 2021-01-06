@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
-'''
+"""
+基于twisted实现的HTTPS代理服务
+
 SSL/TLS requests follow a different logic when a browser uses a proxy. 
 Instead of performing the SSL/TLS handshake at the start, 
 web browser will send a CONNECT request to the proxy 
 to make sure that the proxy can connect to the target server. 
 Once the browser receives confirmation, it then initiates the SSL/TLS session 
 and continues with the request.
-'''
+"""
+import sys
+from urllib import parse as urlparse
 
+import twisted.web.http
 from twisted.internet.protocol import Protocol, ClientFactory
 from twisted.web.proxy import Proxy, ProxyRequest
 from twisted.python import log
 from twisted.python.versions import Version
-
-try:
-    import urlparse
-except:
-    from urllib import parse as urlparse
+import twisted.web.http
 
 class ConnectProxyRequest(ProxyRequest):
     """HTTP ProxyRequest handler (factory) that supports CONNECT"""
@@ -34,7 +35,7 @@ class ConnectProxyRequest(ProxyRequest):
         self.write(body.encode())
         self.finish()
 
-    def splitHostPort(self, hostport, default_port):
+    def split_host_port(self, hostport, default_port):
         port = default_port
         parts = hostport.split(b':', 1)
         if len(parts) == 2:
@@ -47,8 +48,8 @@ class ConnectProxyRequest(ProxyRequest):
     def processConnectRequest(self):
         parsed = urlparse.urlparse(self.uri)
         default_port = self.ports.get(parsed.scheme)
-        host, port = self.splitHostPort(parsed.netloc or parsed.path,
-                                        default_port)
+        host, port = self.split_host_port(parsed.netloc or parsed.path,
+                                          default_port)
         if port is None:
             self.fail("Bad CONNECT Request",
                       "Unable to parse port from URI: %s" % repr(self.uri))
@@ -70,7 +71,7 @@ class ConnectProxy(Proxy):
             self.connectedRemote.connectedClient = self
             if twisted.version >= Version(twisted.__name__, 16, 3, 0):
                 self._handlingRequest = False
-                #self._producer.resumeProducing()
+                # self._producer.resumeProducing()
                 if self._savedTimeOut:
                     self.setTimeout(self._savedTimeOut)
                 data = b''.join(self._dataBuffer)
@@ -130,17 +131,19 @@ class ConnectProxyClientFactory(ClientFactory):
         self.request.fail(b"Gateway Error", str(reason))
 
 
-if __name__ == '__main__':
-    import sys
-    log.startLogging(sys.stderr)
+class HTTPSProxyServer(object):
+    def __init__(self, listen_port: int = 10443):
+        self.listen_port = listen_port
 
-    import argparse
-    ap = argparse.ArgumentParser()
-    ap.add_argument('port', default=58080, nargs='?', type=int)
-    ns = ap.parse_args()
+    def start(self):
+        log.startLogging(sys.stderr)
+        factory = twisted.web.http.HTTPFactory()
+        factory.protocol = ConnectProxy
+        twisted.internet.reactor.listenTCP(self.listen_port, factory)
+        twisted.internet.reactor.run()
 
-    import twisted.web.http
-    factory = twisted.web.http.HTTPFactory()
-    factory.protocol = ConnectProxy
-    twisted.internet.reactor.listenTCP(ns.port, factory)
-    twisted.internet.reactor.run()
+
+if __name__ == "__main__":
+    p = HTTPSProxyServer()
+    p.start()
+

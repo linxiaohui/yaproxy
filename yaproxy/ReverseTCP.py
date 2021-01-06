@@ -48,8 +48,8 @@ class ClientProtocol(protocol.Protocol):
             self.transport.write(data)
 
 class TcpReverseServer(object):
-    def __init__(self, port: int = 8080):
-        self.listen_port = port
+    def __init__(self, listen_port: int = 8080):
+        self.listen_port = listen_port
         self.remote_host = None
         self.remote_port = None
 
