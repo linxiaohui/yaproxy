@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-基于twisted实现的HTTPS代理服务
+基于twisted实现的HTTPS代理服务; 支持HTTP/HTTPS协议
 
 SSL/TLS requests follow a different logic when a browser uses a proxy. 
 Instead of performing the SSL/TLS handshake at the start, 

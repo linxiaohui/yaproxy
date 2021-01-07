@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="yaproxy",
-    version="0.0.1",
+    version="0.0.3",
     author="Lin Xiao Hui",
     author_email="llinxiaohui@126.com",
     description="Yet Another Proxy",

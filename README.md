@@ -36,8 +36,10 @@ p.start()
 
 ## HTTPS代理
 ```python
+# 支持HTTP、HTTPS协议
 from yaproxy.HTTPSProxyServer import HTTPSProxyServer
 p = HTTPSProxyServer(listen_port=10443)
+p.start()
 ```
 
 ## DNS代理
@@ -51,6 +53,7 @@ svr = DNSServer()
 svr.set_hosts({b'abc': b'127.0.0.1'})
 svr.start()
 ```
+
 ## HTTP反向代理
 ```python
 from yaproxy.ReverseHTTP import HttpReverseServer
